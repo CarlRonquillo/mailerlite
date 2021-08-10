@@ -26,14 +26,14 @@
             <div class="text-danger">{{ $message }}</div>
         @enderror
 
-        @if(!empty($error))
-            <div class="text-danger">{{ $error }}</div>
+        @if(session('message'))
+            <div class="text-danger">{{ session('message') }}</div>
         @endif
 
         <form class="mt-2 row" action="/keys" method="POST">
             @csrf
-            <input name="api_key" class="col-md-8 offset-md-2 form-control form-control-lg" type="text" placeholder="your API Key here" aria-label=".form-control-lg example" value="{{ isset($api_key)  ? $api_key : '' }}">
-
+            <input name="api_key" class="col-md-10 offset-md-1 form-control form-control-lg" type="text"
+                placeholder="your API Key here" aria-label=".form-control-lg example" value="{{ session('key') }}">
             <div class="col-md-12 mt-4">
                 <button type="submit" class="col-md-3 btn btn-primary btn-lg ">Submit</button>
             </div>

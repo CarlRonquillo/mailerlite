@@ -21,7 +21,7 @@ class SubscribersController extends Controller
                         ->get()
                         ->toArray();
 
-        if(isset($groupsApi['0']->error)) {
+        if (isset($groupsApi['0']->error)) {
             $data = ['message' => 'API Key is invalid.'];
         } else {
             $data = ['subscribers' => $subscribers];
@@ -37,7 +37,8 @@ class SubscribersController extends Controller
      */
     public function create()
     {
-        return view('subscribers.create');
+        $countries = $this->getCountries();
+        return view('subscribers.create',['countries' => $countries]);
     }
 
     /**
@@ -48,7 +49,63 @@ class SubscribersController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'email' => 'required|email',
+            'name' => 'required',
+            'country' => 'required'
+        ]);
+        
+        $message = '';
+        $messageClass = 'alert-info';
+        $key = $request->session()->get('key');
+        $subscribersApi = (new MailerLite($key))->subscribers();
+
+        $email = $request->input('email');
+        $name = $request->input('name');
+        $country = $request->input('country');
+
+        // check if subscriber already exists
+        $checkSubscriber = $subscribersApi->find($email);
+        if (isset($checkSubscriber->id)) {
+            $message = 'Subscriber already exists.';
+            $messageClass = 'alert-danger';
+        } else {
+            $subscriber = [
+                'email' => $email,
+                'name' => $name,
+                'fields' => [
+                  'country' => $country
+                ]
+            ];
+    
+            $addedSubscriber = $subscribersApi->create($subscriber);
+
+            if (isset($addedSubscriber->error)) {
+                $message = $addedSubscriber->error->message;
+                $messageClass = 'alert-danger';
+            } elseif (isset($addedSubscriber->id)) {
+                $message = "User with email ".$email." was successfully subscribed.";
+                $messageClass = 'alert-success';
+            } else {
+                $message = "Adding subscriber failed. Please try again.";
+                $messageClass = 'alert-danger';
+            }
+        }
+
+        $request->session()->flash('email', $email);
+        $request->session()->flash('name', $name);
+        $request->session()->flash('country', $country);
+
+        // alert message
+        $request->session()->flash('message', $message);
+        $request->session()->flash('messageClass', $messageClass);
+
+        $countries = $this->getCountries();
+
+        return redirect('/subscribers/create')->with([
+                'countries' => $countries
+            ]
+        );
     }
 
     /**
@@ -94,5 +151,17 @@ class SubscribersController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getCountries()
+    {
+        $countries = [];
+        $path = storage_path('app\json\countries.json');
+
+        if (file_exists($path)) {
+            $countries = json_decode(file_get_contents($path), true);
+        }
+
+        return $countries;
     }
 }

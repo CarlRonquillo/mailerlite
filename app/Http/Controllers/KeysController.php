@@ -25,7 +25,7 @@ class KeysController extends Controller
     {
         $key = Key::select('key','id')->first();
 
-        if($key) {
+        if ($key) {
             //save on session
             $this->saveSession([
                 'key' => $key['key'],
@@ -68,7 +68,7 @@ class KeysController extends Controller
                         ->get()
                         ->toArray();
 
-        if(isset($groupsApi['0']->error)) {
+        if (isset($groupsApi['0']->error)) {
             $message = 'API Key is invalid.';
         } else {
             $key = Key::create(['key' => $inputKey]);
@@ -84,7 +84,10 @@ class KeysController extends Controller
             }
         }
 
-        return view('keys.create')->with(['error' => $message, 'api_key' => $inputKey]);
+        $this->request->session()->flash('key', $inputKey);
+        $this->request->session()->flash('message', $message);
+
+        return redirect('/keys/create');
     }
 
     /**

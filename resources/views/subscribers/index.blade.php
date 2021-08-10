@@ -1,9 +1,10 @@
 @extends('layouts.app')
 
-@section('content')
+@section('title','MailerLite | Subscribers List')
 
+@section('content')
     <div class="container text-center mt-5">
-        <h1>Subscribers!</h1>
+        <h1>Subscribers List</h1>
 
         @if(!empty($message))
             <div class="alert alert-danger" role="alert">
@@ -17,5 +18,4 @@
             <p>No subscribers found</p>
         @endforelse
     </div>
-    
 @endsection
