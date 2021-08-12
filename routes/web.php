@@ -20,3 +20,4 @@ Route::get('/', [KeysController::class, 'index']);
 Route::resource('/keys', KeysController::class);
 
 Route::resource('/subscribers', SubscribersController::class);
+Route::post('/subscribers', [SubscribersController::class, 'list']);

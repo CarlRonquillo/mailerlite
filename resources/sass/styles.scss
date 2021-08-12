@@ -1,0 +1,47 @@
+body {
+    background-color: #fff;
+}
+
+.nav {
+
+    li.nav-item {
+
+        .navbar-brand {
+            img {
+                width: 120px;
+            }
+        }
+
+        &.active a {
+            color: #09C269 !important;
+            border-bottom: 1px #09C269 solid;
+            border-radius: 0;
+        }
+
+        a.nav-link {
+            padding-bottom: 0;
+            padding-top: 14px;
+            font-size: 20px;
+        }
+    }   
+}
+
+.key-wrapper {
+    padding-bottom: 0;
+    padding-right: 0;
+    padding-top: 22px;
+
+    form {
+        margin: 0;
+        display: initial;
+
+        button{
+            padding: 4px 2px;
+        }
+    }
+
+    span {
+        padding-right: 10px;
+        text-decoration: underline;
+    }
+}

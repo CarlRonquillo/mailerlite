@@ -131,7 +131,7 @@ class KeysController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
-    {        
+    {
         $key = Key::find($id)->first();
 
         if($key->delete()) {

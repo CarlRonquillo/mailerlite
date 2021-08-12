@@ -31,7 +31,6 @@
         @endif
 
         <form class="mt-2 row" action="/keys" method="POST">
-            @csrf
             <input name="api_key" class="col-md-10 offset-md-1 form-control form-control-lg" type="text"
                 placeholder="your API Key here" aria-label=".form-control-lg example" value="{{ session('key') }}">
             <div class="col-md-12 mt-4">

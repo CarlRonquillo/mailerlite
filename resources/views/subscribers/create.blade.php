@@ -6,8 +6,6 @@
     <div class="container text-center mt-5 col-lg-4">
         <h1>Add Subscriber</h1>
         <form class="mt-4 row" action="/subscribers" method="POST">
-            @csrf
-
             @if(session('message'))
                 <div class="alert {{ session('messageClass') }} col-lg-12" role="alert">
                     {{ session('message') }}

@@ -12,7 +12,8 @@
         "laravel/framework": "^8.40",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.3",
-        "mailerlite/mailerlite-api-v2-php-sdk": "^0.3.1"
+        "mailerlite/mailerlite-api-v2-php-sdk": "^0.3.1",
+        "yajra/laravel-datatables-oracle": "^9.18"
     },
     "require-dev": {
         "facade/ignition": "^2.5",
@@ -27,7 +28,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

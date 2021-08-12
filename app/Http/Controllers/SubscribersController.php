@@ -4,30 +4,90 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use MailerLiteApi\MailerLite;
+use Http\Client\Exception\HttpException;
+
+use App\Models\Key;
 
 class SubscribersController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
+    public function list(Request $request)
+    {
+        try {
+            $key = $request->session()->get('key');
+            $subscribersApi = (new MailerLite($key))->subscribers();
+
+            $columns = ['#','email','name','country','date','time'];
+
+            $draw = $request->input('draw');
+            $limit = $request->input('length') ? : 10;
+            $offset = $request->input('start') ? : 0;
+            $field = $columns[(int)$request->input('order.0.column') ? : 4];
+            $direction = $request->input('order.0.dir') ? : 'DESC';
+            $searchQuery = $request->input('search.value') ? : null;
+            $subsTotal = $subscribersApi->get()->count();
+            $recordsFiltered = $subsTotal;
+
+            if ($searchQuery) {
+                $subscribers = $subscribersApi->search($searchQuery);
+                $recordsFiltered = count($subscribers);
+            } else {
+                $subscribers = $subscribersApi
+                    ->orderBy($field, strtoupper($direction))
+                    ->limit($limit)
+                    ->offset($offset)
+                    ->get()
+                    ->toArray();
+            }
+
+            if (isset($subscribers[0]->error)) {
+                $errorCode = $data[0]->error->code;
+                if ($data[0]->error->code === 1) {
+                    $errorCode = 401;
+                } elseif ($data[0]->error->code === 2) {
+                    $errorCode = 404;
+                }
+                
+                return response()->json(['status' => false, 'message' => $data[0]->error->message], $errorCode)->setCallback($request->input('callback'));
+            }
+
+            $data = [];
+            $count = 0;
+            if ($recordsFiltered) {
+                foreach ($subscribers as $subscriber) {
+                    $count++;
+                    $datum  = [
+                        'id' => $subscriber->id,
+                        '#' => $count,
+                        'email' => $subscriber->email,
+                        'name' => $subscriber->name,
+                        'country' => get_country($subscriber->fields),
+                        'date' => get_date_time($subscriber->date_created),
+                        'time' => get_date_time($subscriber->date_created, true)
+                    ];
+
+                    array_push($data,$datum);
+                }
+            }
+
+            $responseData = [
+                'draw' => $draw,
+                'recordsTotal' => $subsTotal,
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+                'query' => $searchQuery
+            ];
+
+            return response()->json($responseData, 200)->setCallback($request->input('callback'));;
+        } catch (HttpException $e) {
+            return response()->json($e->getMessage(), $e->getStatusCode())->setCallback($request->input('callback'));
+        }
+        
+    }
+
     public function index(Request $request)
     {
-        $key = $request->session()->get('key');
-
-        $subscribers = (new MailerLite($key))
-                        ->subscribers()
-                        ->get()
-                        ->toArray();
-
-        if (isset($groupsApi['0']->error)) {
-            $data = ['message' => 'API Key is invalid.'];
-        } else {
-            $data = ['subscribers' => $subscribers];
-        }
-
-        return view('subscribers.index',['data' => $data]);
+        return view('subscribers.index');
     }
 
     /**

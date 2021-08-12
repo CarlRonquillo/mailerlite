@@ -6,46 +6,9 @@
     <title>@yield('title')</title>
 
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+    @stack('styles')
 </head>
-
-<style>
-    .navbar-brand img{
-        width: 120px;
-    }
-
-    a.nav-link {
-        padding-bottom: 0;
-        padding-top: 14px;
-        font-size: 20px;
-    }
-
-    .key-wrapper {
-        padding-bottom: 0;
-        padding-right: 0;
-        padding-top: 22px;
-    }
-
-    .key-wrapper form {
-        margin: 0;
-        display: initial;
-    }
-
-    .key-wrapper form button{
-        padding: 4px 2px;
-    }
-
-    .key-wrapper span {
-        padding-right: 10px;
-        text-decoration: underline;
-    }
-
-    li.nav-item.active a {
-        color: #09C269 !important;
-        border-bottom: 1px #09C269 solid;
-        border-radius: 0;
-    }
-
-</style>
 
 <body>
     <div class="container">
@@ -82,6 +45,9 @@
 
     @yield('content')
 
-    <script src="{{ asset('js/app.js') }}" defer></script>
 </body>
 </html>
+
+<script type="text/javascript" language="javascript" src="{{ asset('js/app.js') }}"></script>
+<script type="text/javascript" language="javascript" src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
+@stack('scripts')
