@@ -12,7 +12,7 @@
 <body class="d-flex text-center">
     <div class="container keys-wrapper border p-5 bg-white">
         <p class="h1">Howdy!</p>
-        <p class="h3 mb-3">please enter your MailerLite API Key</p>
+        <p class="h3 mb-3">please enter your <img class="mailerlite-logo px-1" src="{{ asset('img/mailerlite-logo.png') }}" alt="MailerLite-logo"> API Key</p>
 
         @error('api_key')
             <div class="alert alert-danger alert-block col-md-12">

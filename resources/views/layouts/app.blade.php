@@ -12,11 +12,11 @@
 
 <body>
     <div class="container">
-        <header class="d-flex py-3 border-bottom row">
+        <header class="d-flex py-2 px-4 border-bottom row">
             <ul class="nav nav-pills justify-content-left col-md-6">
                 <li class="nav-item">
                     <a class="navbar-brand" href="/">
-                        <img src="https://www.mailerlite.com/assets/logo-color.png" alt="MailerLite">
+                        <img src="{{ asset('img/mailerlite-logo.png') }}" alt="MailerLite-logo">
                     </a>
                 </li>
                 <li class="nav-item {{ request()->is('subscribers') ? 'active' : '' }}">

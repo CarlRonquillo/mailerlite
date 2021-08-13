@@ -2,6 +2,11 @@ body {
     background-color: #fff;
 }
 
+img.mailerlite-logo {
+    width: 130px;
+    margin-bottom: 3px;
+}
+
 button.btn-primary {
     background: #09C269;
     border: 0;
@@ -19,6 +24,20 @@ button.btn-primary {
     }
 }
 
+#tbl-subscribers {
+    .text-primary {
+        color: #09C269 !important;
+    }
+    
+    a.text-primary:hover, a.text-primary:focus {
+        color: #0a8a4c !important;
+    }
+}
+
+a.page-link {
+    color: #09C269;
+}
+
 .page-item.active .page-link {
     background-color: #09C269;
     border-color: #09C269;
@@ -29,8 +48,10 @@ button.btn-primary {
     li.nav-item {
 
         .navbar-brand {
+            padding: 0;
             img {
                 width: 120px;
+                margin-top: 13px;
             }
         }
 

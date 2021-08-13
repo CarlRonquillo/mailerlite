@@ -12,7 +12,7 @@ class ApiController extends Controller
     {
         try {
             $key = Key::select('key')->first();
-            $subscribersApi = (new MailerLite($key))->subscribers();
+            $subscribersApi = (new MailerLite($key->key))->subscribers();
 
             $columns = ['#','email','name','country','date','time'];
 

@@ -5,7 +5,7 @@
 @section('content')
     <div class="container text-center mt-5 col-lg-4">
         <h1>Edit Subscriber</h1>
-        <form class="mt-4 row" action="/subscribers/{{ $subscriber->id }}" method="POST">
+        <form class="mt-4 row" action="/subscribers/{{ isset($subscriber->id) ? $subscriber->id : 0 }}" method="POST">
             @method('PUT')
 
             @include('layouts/flash-message')
@@ -23,7 +23,7 @@
                     if (old('name')):
                         $name = old('name');
                     else:
-                        $name = $subscriber->name;
+                        $name = isset($subscriber->name) ? : '';
                     endif;
                 @endphp
                 <input type="text" id="name" name="name" class="form-control" value="{{ isset($subscriber->name) ? $subscriber->name : '' }}">

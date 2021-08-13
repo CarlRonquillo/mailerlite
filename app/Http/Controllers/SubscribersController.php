@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use MailerLiteApi\MailerLite;
 use Http\Client\Exception\HttpException;
 use App\Http\Requests\SubscriberValidationRequest;
+use App\Models\Key;
 
 class SubscribersController extends Controller
 {
@@ -18,11 +19,11 @@ class SubscribersController extends Controller
     ) {
         $this->request = $request;
     }
-    
+
     protected function initSubscribersApi()
     {
         try {
-            $key = $this->request->session()->get('key');
+            $key = Key::select('key')->first()->key;
             if(isset($key)) {
                 $this->subscribersApi = (new MailerLite($key))->subscribers();
             } else {
@@ -36,7 +37,6 @@ class SubscribersController extends Controller
 
     public function index()
     {
-        $this->checkKey();
         return view('subscribers.index');
     }
 
@@ -115,11 +115,15 @@ class SubscribersController extends Controller
             $this->initSubscribersApi();
             $subscriber = $this->subscribersApi->find($id);
 
-            foreach ($subscriber->fields as $field){
-                if ($field->key == 'country'){
-                    $country = $field->value;
-                    break;
+            if (isset($subscriber->id)) {
+                foreach ($subscriber->fields as $field) {
+                    if ($field->key == 'country'){
+                        $country = $field->value;
+                        break;
+                    }
                 }
+            } else {
+                $this->request->session()->flash('error', 'Subscriber ID is not valid.');
             }
         } catch (\Exception $e) {
             $this->request->session()->flash('error', $e->getMessage());
