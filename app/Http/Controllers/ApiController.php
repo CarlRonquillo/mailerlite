@@ -11,7 +11,7 @@ class ApiController extends Controller
     public function list(Request $request)
     {
         try {
-            $key = Key::select('key')->first()->key;
+            $key = Key::select('key')->first();
             $subscribersApi = (new MailerLite($key))->subscribers();
 
             $columns = ['#','email','name','country','date','time'];

@@ -18,13 +18,15 @@ class SubscribersController extends Controller
     ) {
         $this->request = $request;
     }
-
+    
     protected function initSubscribersApi()
     {
         try {
             $key = $this->request->session()->get('key');
-            if($key) {
+            if(isset($key)) {
                 $this->subscribersApi = (new MailerLite($key))->subscribers();
+            } else {
+                return redirect('/');
             }
         } catch (\Exception $e) {
             $this->request->session()->flash('error', $e->getMessage());
@@ -34,6 +36,7 @@ class SubscribersController extends Controller
 
     public function index()
     {
+        $this->checkKey();
         return view('subscribers.index');
     }
 
