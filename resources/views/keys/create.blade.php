@@ -6,16 +6,8 @@
     <title>MailerLite | Add API Key</title>
 
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 </head>
-
-<style>
-    .keys-wrapper {
-        width: 100%;
-        max-width: 600px;
-        padding: 15px;
-        margin: auto;
-    }
-</style>
 
 <body class="d-flex text-center">
     <div class="container keys-wrapper border p-5 bg-white">
@@ -23,7 +15,10 @@
         <p class="h3 mb-3">please enter your MailerLite API Key</p>
 
         @error('api_key')
-            <div class="text-danger">{{ $message }}</div>
+            <div class="alert alert-danger alert-block col-md-12">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                <strong>{{ $message }}</strong>
+            </div>
         @enderror
 
         @include('layouts/flash-message')

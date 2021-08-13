@@ -2,6 +2,26 @@ body {
   background-color: #fff;
 }
 
+button.btn-primary {
+  background: #09C269;
+  border: 0;
+}
+button.btn-primary:hover, button.btn-primary:focus {
+  background: #05b15e;
+}
+
+.btn-link {
+  color: #09C269;
+}
+.btn-link:hover, .btn-link:focus {
+  color: #05b15e;
+}
+
+.page-item.active .page-link {
+  background-color: #09C269;
+  border-color: #09C269;
+}
+
 .nav li.nav-item .navbar-brand img {
   width: 120px;
 }
@@ -14,6 +34,14 @@ body {
   padding-bottom: 0;
   padding-top: 14px;
   font-size: 20px;
+}
+
+.container.keys-wrapper {
+  width: 100%;
+  max-width: 600px;
+  padding: 15px;
+  margin: auto;
+  margin-top: 230px;
 }
 
 .key-wrapper {
