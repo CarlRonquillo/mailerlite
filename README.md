@@ -1,7 +1,7 @@
 # Installation Instruction
 Requirements: PHP 7.4, MySQL 5.x and latest Chrome browser.
 
-1. Clone this repository to your desired project folder.
+1. Clone this repository to your desired project folder (`git clone https://github.com/CarlRonquillo/mailerlite.git`).
 2. Create DB and import the backup database that I sent to you (`mailerlite.sql`).
 3. Open the cloned project to your desired text editor.
 4. Copy `.env.example` to the root directory and rename it to `.env`.
