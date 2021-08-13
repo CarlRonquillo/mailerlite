@@ -19,4 +19,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/api/v1/subscribers', [ApiController::class, 'getSubscribers'])->name('api.subscribers.index');
+Route::get('subscribers', [ApiController::class, 'list'])->name('api.index');

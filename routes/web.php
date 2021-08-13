@@ -16,8 +16,7 @@ use App\Http\Controllers\SubscribersController;
 */
 
 Route::get('/', [KeysController::class, 'index']);
+Route::post('/subscribers', [SubscribersController::class, 'list']);
 
 Route::resource('/keys', KeysController::class);
-
 Route::resource('/subscribers', SubscribersController::class);
-Route::post('/subscribers', [SubscribersController::class, 'list']);

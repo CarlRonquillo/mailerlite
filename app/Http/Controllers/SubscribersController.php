@@ -5,212 +5,193 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use MailerLiteApi\MailerLite;
 use Http\Client\Exception\HttpException;
-
-use App\Models\Key;
+use App\Http\Requests\SubscriberValidationRequest;
 
 class SubscribersController extends Controller
 {
 
-    public function list(Request $request)
-    {
-        try {
-            $key = $request->session()->get('key');
-            $subscribersApi = (new MailerLite($key))->subscribers();
+    protected $request;
+    protected $subscribersApi;
 
-            $columns = ['#','email','name','country','date','time'];
-
-            $draw = $request->input('draw');
-            $limit = $request->input('length') ? : 10;
-            $offset = $request->input('start') ? : 0;
-            $field = $columns[(int)$request->input('order.0.column') ? : 4];
-            $direction = $request->input('order.0.dir') ? : 'DESC';
-            $searchQuery = $request->input('search.value') ? : null;
-            $subsTotal = $subscribersApi->get()->count();
-            $recordsFiltered = $subsTotal;
-
-            if ($searchQuery) {
-                $subscribers = $subscribersApi->search($searchQuery);
-                $recordsFiltered = count($subscribers);
-            } else {
-                $subscribers = $subscribersApi
-                    ->orderBy($field, strtoupper($direction))
-                    ->limit($limit)
-                    ->offset($offset)
-                    ->get()
-                    ->toArray();
-            }
-
-            if (isset($subscribers[0]->error)) {
-                $errorCode = $data[0]->error->code;
-                if ($data[0]->error->code === 1) {
-                    $errorCode = 401;
-                } elseif ($data[0]->error->code === 2) {
-                    $errorCode = 404;
-                }
-                
-                return response()->json(['status' => false, 'message' => $data[0]->error->message], $errorCode)->setCallback($request->input('callback'));
-            }
-
-            $data = [];
-            $count = 0;
-            if ($recordsFiltered) {
-                foreach ($subscribers as $subscriber) {
-                    $count++;
-                    $datum  = [
-                        'id' => $subscriber->id,
-                        '#' => $count,
-                        'email' => $subscriber->email,
-                        'name' => $subscriber->name,
-                        'country' => get_country($subscriber->fields),
-                        'date' => get_date_time($subscriber->date_created),
-                        'time' => get_date_time($subscriber->date_created, true)
-                    ];
-
-                    array_push($data,$datum);
-                }
-            }
-
-            $responseData = [
-                'draw' => $draw,
-                'recordsTotal' => $subsTotal,
-                'recordsFiltered' => $recordsFiltered,
-                'data' => $data,
-                'query' => $searchQuery
-            ];
-
-            return response()->json($responseData, 200)->setCallback($request->input('callback'));;
-        } catch (HttpException $e) {
-            return response()->json($e->getMessage(), $e->getStatusCode())->setCallback($request->input('callback'));
-        }
-        
+    public function __construct(
+        Request $request
+    ) {
+        $this->request = $request;
     }
 
-    public function index(Request $request)
+    protected function initSubscribersApi()
+    {
+        try {
+            $key = $this->request->session()->get('key');
+            if($key) {
+                $this->subscribersApi = (new MailerLite($key))->subscribers();
+            }
+        } catch (\Exception $e) {
+            $this->request->session()->flash('error', $e->getMessage());
+            return redirect('/');
+        }
+    }
+
+    public function index()
     {
         return view('subscribers.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-        $countries = $this->getCountries();
-        return view('subscribers.create',['countries' => $countries]);
+        return view('subscribers.create',[
+            'countries' => $this->getCountries()
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(SubscriberValidationRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'name' => 'required',
-            'country' => 'required'
-        ]);
-        
-        $message = '';
-        $messageClass = 'alert-info';
-        $key = $request->session()->get('key');
-        $subscribersApi = (new MailerLite($key))->subscribers();
+        $request->validated();
 
-        $email = $request->input('email');
-        $name = $request->input('name');
-        $country = $request->input('country');
+        try {
+            $this->initSubscribersApi();
 
-        // check if subscriber already exists
-        $checkSubscriber = $subscribersApi->find($email);
-        if (isset($checkSubscriber->id)) {
-            $message = 'Subscriber already exists.';
-            $messageClass = 'alert-danger';
-        } else {
-            $subscriber = [
-                'email' => $email,
-                'name' => $name,
-                'fields' => [
-                  'country' => $country
-                ]
-            ];
-    
-            $addedSubscriber = $subscribersApi->create($subscriber);
+            $email = $request->input('email');
+            $name = $request->input('name');
+            $country = $request->input('country');
 
-            if (isset($addedSubscriber->error)) {
-                $message = $addedSubscriber->error->message;
-                $messageClass = 'alert-danger';
-            } elseif (isset($addedSubscriber->id)) {
-                $message = "User with email ".$email." was successfully subscribed.";
-                $messageClass = 'alert-success';
+            // check if subscriber already exists
+            $checkSubscriber = $this->subscribersApi->find($email);
+            if (isset($checkSubscriber->id)) {
+                $alert = 'Subscriber already exists.';
+                $alertType = 'error';
             } else {
-                $message = "Adding subscriber failed. Please try again.";
-                $messageClass = 'alert-danger';
+                $subscriber = [
+                    'email' => $email,
+                    'name' => $name,
+                    'fields' => [
+                    'country' => $country
+                    ]
+                ];
+        
+                $addedSubscriber = $this->subscribersApi->create($subscriber);
+
+                if (isset($addedSubscriber->error)) {
+                    $alert = $addedSubscriber->error->message;
+                    $alertType = 'error';
+                } elseif (isset($addedSubscriber->id)) {
+                    $alert = "User with email ".$email." was successfully subscribed. Go back to <a href='/subscribers'>list</a>.";
+                    $alertType = 'success';
+                } else {
+                    $alert = "Adding subscriber failed. Please try again.";
+                    $alertType = 'error';
+                }
             }
+
+        } catch (\Exception  $e) {
+            $this->request->session()->flash('error', $e->getMessage());
         }
 
-        $request->session()->flash('email', $email);
-        $request->session()->flash('name', $name);
-        $request->session()->flash('country', $country);
+        if($alertType == 'error') {
+            $this->request->session()->flash('name', $name);
+            $this->request->session()->flash('email', $email);
+            $this->request->session()->flash('country', $country);
+        }
 
-        // alert message
-        $request->session()->flash('message', $message);
-        $request->session()->flash('messageClass', $messageClass);
-
-        $countries = $this->getCountries();
-
-        return redirect('/subscribers/create')->with([
-                'countries' => $countries
-            ]
-        );
+        return redirect('/subscribers/create')->with($alertType, $alert);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
-        //
+        $message = '';
+        $messageClass = '';
+        $country = '';
+        $subscriber = [];
+
+        try {
+            $this->initSubscribersApi();
+            $subscriber = $this->subscribersApi->find($id);
+
+            foreach ($subscriber->fields as $field){
+                if ($field->key == 'country'){
+                    $country = $field->value;
+                    break;
+                }
+            }
+        } catch (\Exception $e) {
+            $this->request->session()->flash('error', $e->getMessage());
+        }
+
+        return view('subscribers.edit',[
+            'subscriber' => $subscriber,
+            'currentCountry' => $country,
+            'countries' => $this->getCountries()
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function update(SubscriberValidationRequest $request, $id)
     {
-        //
+        $request->validated();
+
+        $country = '';
+        $subscriber = '';
+
+        try {
+            $this->initSubscribersApi();
+
+            $subscriberData = [
+                'name' => $request->get('name'),
+                'fields' => [
+                    'country' => $request->get('country')
+                ]
+            ];
+
+            $subscriber = $this->subscribersApi->update($id, $subscriberData);
+
+            if(isset($subscriber->id)) {
+                $country = $request->get('country');
+
+                $alert = 'Subscriber was successfully updated. Go back to <a href="/subscribers">list</a>.';
+                $alertType = 'success';
+            } else {
+                $message = 'Something went wrong. Please try again.';
+                $messageClass = 'error';
+            }
+            
+        } catch (\Exception  $e) {
+            $alert = $e->getMessage();
+            $alertType = 'error';
+        }
+
+        return back()->with($alertType,$alert);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
-        //
+        try {
+            $alert = 'Subscriber with id: '. $id .' was successfully deleted.';
+            $alertClass = 'alert-success';
+            $code = 200;
+
+            $this->initSubscribersApi();
+            $return = $this->subscribersApi->delete($id);
+
+            if (isset($return)) {
+                $alert = $response->error->message;
+                $alertClass = 'alert-danger';
+                $code = 500;
+            }
+
+            return response()->json([
+                'alert' => $alert,
+                'alertClass' => $alertClass
+            ], $code);
+            
+        } catch (\Exception  $e) {
+            return response()->json([
+                'alert' => $e->getmessage()
+            ], 500);
+        }
     }
 
     public function getCountries()

@@ -85,9 +85,8 @@ class KeysController extends Controller
         }
 
         $this->request->session()->flash('key', $inputKey);
-        $this->request->session()->flash('message', $message);
 
-        return redirect('/keys/create');
+        return redirect('/keys/create')->with('error',$message);
     }
 
     /**

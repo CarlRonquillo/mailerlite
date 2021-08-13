@@ -26,9 +26,7 @@
             <div class="text-danger">{{ $message }}</div>
         @enderror
 
-        @if(session('message'))
-            <div class="text-danger">{{ session('message') }}</div>
-        @endif
+        @include('layouts/flash-message')
 
         <form class="mt-2 row" action="/keys" method="POST">
             <input name="api_key" class="col-md-10 offset-md-1 form-control form-control-lg" type="text"
